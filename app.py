@@ -1,17 +1,15 @@
+
 import pandas as pd
 import streamlit as st
 
-# Configuración inicial de Streamlit
 st.set_page_config(page_title="Cotizador de Reciclaje", page_icon="♻️")
 st.title("Cotizador de Reciclaje de Equipos Electrónicos")
 st.write("Agregue uno o más equipos y sus cantidades para obtener el precio total de cobro.")
 
-# Cargar la base de datos
 @st.cache_data
 def cargar_datos():
     return pd.read_csv("equipos_reciclaje.csv")
 
-# Calcular precio de cobro para un equipo y cantidad
 def calcular_cotizacion(datos_equipo, cantidad):
     tiempo_sorting = datos_equipo["TiempoSorting"]
     operarios_sorting = datos_equipo["OperariosSorting"]
@@ -26,13 +24,11 @@ def calcular_cotizacion(datos_equipo, cantidad):
     costo_energia = datos_equipo["CostoEnergia"]
     valor_materiales = datos_equipo["ValorMateriales"]
 
-    # Costo de mano de obra por proceso (por pieza)
     costo_mano_obra_sorting = (tiempo_sorting / 60) * operarios_sorting * costo_hora
     costo_mano_obra_desensamblaje = (tiempo_desensamblaje / 60) * operarios_desensamblaje * costo_hora
     costo_mano_obra_pesaje = (tiempo_pesaje / 60) * operarios_pesaje * costo_hora
     costo_mano_obra_almacenaje = (tiempo_almacenaje / 60) * operarios_almacenaje * costo_hora
 
-    # Costo total de mano de obra por pieza
     costo_mano_obra_total = (
         costo_mano_obra_sorting +
         costo_mano_obra_desensamblaje +
@@ -40,27 +36,20 @@ def calcular_cotizacion(datos_equipo, cantidad):
         costo_mano_obra_almacenaje
     )
 
-    # Costo total por pieza (mano de obra + energía)
     costo_total_pieza = costo_mano_obra_total + costo_energia
-
-    # Costo total por la cantidad de piezas
     costo_total_cantidad = costo_total_pieza * cantidad
     valor_materiales_total = valor_materiales * cantidad
 
-    # Precio de cobro (30% margen + valor de materiales)
     precio_cobro_total = costo_total_cantidad * 1.3 + valor_materiales_total
 
     return round(precio_cobro_total, 2)
 
-# Inicializar estado de sesión para almacenar equipos
 if 'equipos_seleccionados' not in st.session_state:
     st.session_state.equipos_seleccionados = []
 
-# Cargar datos
 datos = cargar_datos()
 equipos = datos["Equipo"].tolist()
 
-# Formulario para agregar un equipo
 st.subheader("Agregar Equipo")
 with st.form("agregar_equipo_form", clear_on_submit=True):
     equipo = st.selectbox("Tipo de equipo", equipos, key="equipo_select")
@@ -71,7 +60,6 @@ with st.form("agregar_equipo_form", clear_on_submit=True):
         st.session_state.equipos_seleccionados.append({"equipo": equipo, "cantidad": cantidad})
         st.success(f"Agregado: {cantidad} {equipo}(s)")
 
-# Mostrar equipos agregados
 if st.session_state.equipos_seleccionados:
     st.subheader("Equipos Agregados")
     for i, item in enumerate(st.session_state.equipos_seleccionados):
@@ -80,7 +68,6 @@ if st.session_state.equipos_seleccionados:
         st.session_state.equipos_seleccionados = []
         st.rerun()
 
-# Botón para calcular el precio total
 if st.session_state.equipos_seleccionados and st.button("Calcular Precio Total"):
     try:
         precio_total = 0
@@ -93,7 +80,6 @@ if st.session_state.equipos_seleccionados and st.button("Calcular Precio Total")
             precio_total += precio_equipo
             resumen.append({"equipo": equipo, "cantidad": cantidad, "precio": precio_equipo})
 
-        # Mostrar resultado
         st.subheader("Resultado de la Cotización")
         for item in resumen:
             st.write(f"**{item['equipo']}** ({item['cantidad']} piezas): ${item['precio']}")
@@ -101,7 +87,6 @@ if st.session_state.equipos_seleccionados and st.button("Calcular Precio Total")
     except IndexError:
         st.error("Uno o más equipos no encontrados en la base de datos.")
 
-# Estilo CSS para mejorar la apariencia
 st.markdown("""
     <style>
     .stButton>button {
@@ -115,3 +100,4 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
+
