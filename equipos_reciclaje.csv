@@ -1,4 +1,0 @@
-Equipo,TiempoSorting,OperariosSorting,TiempoDesensamblaje,OperariosDesensamblaje,TiempoPesaje,OperariosPesaje,TiempoAlmacenaje,OperariosAlmacenaje,CostoHora,CostoEnergia,ValorMateriales
-Laptop,10,1,15,1,5,1,5,1,12,3,15
-CPU,12,1,20,2,5,1,5,1,12,4,20
-Servidor,15,2,25,2,7,1,7,1,15,6,30
